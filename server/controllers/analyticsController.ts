@@ -6,7 +6,7 @@ import userModel from "../models/userModel";
 import ErrorHandler from "../utils/ErrorHandler";
 import { generateLast12MonthsData } from "../utils/analytics.generator";
 
-// Get users -- admin
+// Get users -- admin  
 export const getAnalyticsUsers = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     try {

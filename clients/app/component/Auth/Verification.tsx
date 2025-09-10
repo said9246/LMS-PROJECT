@@ -1,41 +1,25 @@
-import { useActivationMutation } from "@/redux/features/auth/authApi";
 import { FC, useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
 import { VscWorkspaceTrusted } from "react-icons/vsc";
-import { useSelector } from "react-redux";
 import { styles } from "../../../app/styles/style";
+import { useSelector } from "react-redux";
+import { useActivationMutation } from "@/redux/features/auth/authApi";
+import toast from "react-hot-toast";
 
 type Props = {
   setRoute: (route: string) => void;
 };
 
 type VerifyNumber = {
-  "0": string;
-  "1": string;
-  "2": string;
-  "3": string;
+  0: string;
+  1: string;
+  2: string;
+  3: string;
 };
 
-const Verification: FC<Props> = ({ setRoute }) => {
+const VerificationStatic: FC<Props> = ({ setRoute }) => {
   const { token } = useSelector((state: any) => state.auth);
-  const [activation, { isSuccess, error, data }] = useActivationMutation();
-  const [invalidError, setInvalidError] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success("Account activated successfully");
-      setRoute("Login");
-    }
-    if (error) {
-      if ("data" in error) {
-        const errorData = error as any;
-        toast.error(errorData.data.message);
-        setInvalidError(true);
-      } else {
-        console.log("An error occurred", error);
-      }
-    }
-  }, [error, isSuccess, setRoute]);
+  const [activation, { isSuccess, error }] = useActivationMutation();
+  const [invalidError, setInvalidError] = useState(false);
 
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -51,32 +35,46 @@ const Verification: FC<Props> = ({ setRoute }) => {
     3: "",
   });
 
-  const verifyHandler = async () => {
-    const verificationNumber = Object.values(verifyNumber).join("");
-    if (verificationNumber.length !== 4) {
-      setInvalidError(true);
-      return;
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Account activated successfully");
+      setRoute("Login");
     }
-    await activation({
-      activation_token: token,
-      activation_code: verificationNumber,
-    });
-  };
+    if (error && "data" in error) {
+      toast.error((error as any).data.message);
+      setInvalidError(true);
+    }
+  }, [error, isSuccess, setRoute]);
 
   const handleInputChange = (index: number, value: string) => {
+    if (!/^\d?$/.test(value)) return; // Only allow single digits
     setInvalidError(false);
     const newVerifyNumber = { ...verifyNumber, [index]: value };
     setVerifyNumber(newVerifyNumber);
 
-    if (value === "" && index > 0) {
-      inputRefs[index - 1].current?.focus();
-    } else if (value.length === 1 && index < 3) {
+    if (value && index < 3) {
       inputRefs[index + 1].current?.focus();
+    } else if (!value && index > 0) {
+      inputRefs[index - 1].current?.focus();
     }
   };
+
+  const verifyHandler = async () => {
+    const code = Object.values(verifyNumber).join("");
+    if (code.length !== 4) {
+      setInvalidError(true);
+      return;
+    }
+
+    await activation({
+      activation_token: token,
+      activation_code: code,
+    });
+  };
+
   return (
     <div>
-      <h1 className={`${styles.title}`}>Verify your account</h1>
+      <h1 className={styles.title}>Verify your account</h1>
       <br />
       <div className="w-full flex items-center justify-center mt-2">
         <div className="w-[80px] h-[80px] rounded-full bg-blue-600 flex items-center justify-center">
@@ -84,19 +82,19 @@ const Verification: FC<Props> = ({ setRoute }) => {
         </div>
       </div>
       <br />
-      <br />
       <div className="m-auto flex items-center justify-around">
         {Object.keys(verifyNumber).map((key, index) => (
           <input
-            type="number"
             key={key}
             ref={inputRefs[index]}
+            type="text"
+            inputMode="numeric"
+            pattern="\d*"
             className={`w-16 h-16 bg-transparent border-[3px] rounded-[10px] flex items-center text-black dark:text-white justify-center text-[18px] font-Poppins outline-none text-center ${
               invalidError
                 ? "shake border-red-500"
                 : "dark:border-white border-[#0000004a]"
             }`}
-            placeholder=""
             maxLength={1}
             value={verifyNumber[key as keyof VerifyNumber]}
             onChange={(e) => handleInputChange(index, e.target.value)}
@@ -104,9 +102,8 @@ const Verification: FC<Props> = ({ setRoute }) => {
         ))}
       </div>
       <br />
-      <br />
       <div className="w-full flex justify-center">
-        <button className={`${styles.button}`} onClick={verifyHandler}>
+        <button className={styles.button} onClick={verifyHandler}>
           Verify OTP
         </button>
       </div>
@@ -124,4 +121,4 @@ const Verification: FC<Props> = ({ setRoute }) => {
   );
 };
 
-export default Verification;
+export default VerificationStatic;

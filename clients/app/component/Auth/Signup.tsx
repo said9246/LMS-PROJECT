@@ -1,10 +1,12 @@
 "use client";
 
 import { useFormik } from "formik";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { AiFillGithub, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import * as Yup from "yup";
+import { useRegisterMutation } from "@/redux/features/auth/authApi";
+import { toast } from "react-hot-toast";
 
 type Props = {
   setRoute: (route: string) => void;
@@ -18,6 +20,25 @@ const Schema = Yup.object().shape({
 
 const Signup: FC<Props> = ({ setRoute }) => {
   const [show, setShow] = useState(false);
+  
+  const [register, { isError, data, isSuccess, error }] = useRegisterMutation();
+
+  
+   useEffect(() => {
+     if (isSuccess) {
+
+       const message = data?.message || "Registration successful";
+       toast.success(message);
+       setRoute("Verification");
+     }
+    if (isError) {
+      const message = (error as any)?.data?.message || "Registration failed";
+      toast.error(message);
+    }
+  }, [isSuccess, data, error, setRoute]);
+
+
+
 
   const formik = useFormik({
     initialValues: {
@@ -26,16 +47,17 @@ const Signup: FC<Props> = ({ setRoute }) => {
       password: "",
     },
     validationSchema: Schema,
-    onSubmit: ({ name, email, password }) => {
-      console.log("Signup data:", { name, email, password });
-      alert(`Signup data:\nName: ${name}\nEmail: ${email}\nPassword: ${password}`);
-    },
+ onSubmit: async ({ name, email, password }) => {
+   const data = { name, email, password };
+   await register(data);
+},
+
   });
 
   const { errors, touched, values, handleChange, handleSubmit } = formik;
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full p-4"> 
       <h1 className="text-2xl font-bold text-center">Join ELearning</h1>
       <form onSubmit={handleSubmit} className="mt-6">
         {/* Name */}
@@ -90,11 +112,11 @@ const Signup: FC<Props> = ({ setRoute }) => {
 
         {/* Submit */}
         <div className="mb-4">
-          <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">Sign Up</button>
+          <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded cursor-pointer">Sign Up</button>
         </div>
 
         {/* Social */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-4"> 
           <p>Or join with</p>
           <div className="flex justify-center gap-4 mt-2">
             <FcGoogle size={30} className="cursor-pointer" />

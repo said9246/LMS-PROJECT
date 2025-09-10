@@ -61,22 +61,22 @@ export const registerUser=catchAsyncErrors(async(req:Request,res:Response,next:N
             const html= await ejs.renderFile(path.join(__dirname,'../mails/activationMail.ejs'),{data});
 
             try {
-                    await sendEmail({
-          email: user.email,
-          subject: "Activate your account",
-          Template: "activationMail.ejs",
-          data,
-        });
+                   await sendEmail({
+  email: user.email,
+  subject: "Activate your account",
+  template: "activationMail.ejs", // 👈 correct
+  data,
+});
+
                 res.status(201).json({
                     success:true,
                     message:`Email sent to ${user.email} successfully`,
                     activationToken:activationToken.Token 
                 });
-                
             } catch (error) {
-                return next(new Errorhanddler('Error while sending mail',500));
-                
-            }
+  
+  return next(new Errorhanddler('Error while sending mail',500));
+}
                 
     } catch (error) {
         return next(new Errorhanddler('Error while registering user',500));
@@ -93,7 +93,7 @@ interface IactivationToken{
 }
 
 export const createActivationToken = (user: any): IactivationToken => {
-    const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const activationCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     const Token = jwt.sign(
         { user, activationCode },

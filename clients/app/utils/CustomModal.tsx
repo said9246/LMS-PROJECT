@@ -1,16 +1,15 @@
 "use client";
-// Backend imports commented
-// import { FC } from "react";
 
 import { Box, Modal } from "@mui/material";
 import { FC } from "react";
 
+type RouteType = "Login" | "Sign-Up" | "Verification";
+
 type Props = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  activeItem: any;
   component: any;
-  setRoute?: (route: string) => void;
+  setRoute?: (route: RouteType) => void; // Corrected type
   refetch?: any;
 };
 
@@ -19,7 +18,7 @@ const CustomModal: FC<Props> = ({
   setOpen,
   setRoute,
   component: Component,
-  refetch
+  refetch,
 }) => {
   return (
     <Modal

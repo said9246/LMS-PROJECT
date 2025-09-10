@@ -5,9 +5,9 @@ import userAuth from "./userAuth";
 interface ProtectedProps {
   children: ReactNode;
 }
-
+ 
 export default function Protected({ children }: ProtectedProps) {
-  const isAuthenticated = true;
+  const isAuthenticated = userAuth();
 
   return isAuthenticated ? children : redirect("/");
 }

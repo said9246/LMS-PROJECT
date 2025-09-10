@@ -5,7 +5,7 @@ import { testController,
      activateUser,
      loginUser,
      logoutUser,
-     updateAccessToken,
+     updateAccessToken,  
      getUserInfo,
      socialAuth
     } from './../controllers/userController';
@@ -13,11 +13,11 @@ import { isAuthenticated } from '../middleware/auth';
 
 
 UserRoute.route('/test').get(testController);
-UserRoute.route('/sign-up').post(registerUser);
+UserRoute.route('/registration').post(registerUser);
 UserRoute.route('/activate-user').post(activateUser);
 UserRoute.route('/login').post(loginUser); 
-UserRoute.route('/logout').post(isAuthenticated,logoutUser)
-UserRoute.route('/refreshtoken').get(updateAccessToken)
+UserRoute.route('/logout').post(isAuthenticated,logoutUser)  
+UserRoute.route('/refresh-token').get(updateAccessToken)
 UserRoute.route('/me').get(isAuthenticated,getUserInfo)
 UserRoute.route('/social-auth').post(socialAuth)
 

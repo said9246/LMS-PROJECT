@@ -7,6 +7,9 @@ import CustomModal from "../utils/CustomModal";
 import Login from "../component/Auth/Login";
 import Signup from "../component/Auth/Signup";
 import { CgProfile } from "react-icons/cg";
+import Verification from "../component/Auth/Verification";
+import { useSelector } from "react-redux";
+  import avatar from "../../public/assets/Profile.png";
 
 // Menu items
 const menuItems = [
@@ -20,8 +23,15 @@ const menuItems = [
 const Header = () => {
   const [open, setOpen] = useState(false); // Mobile menu
   const [modalOpen, setModalOpen] = useState(false); // Modal open/close
-  const [route, setRoute] = useState<"Login" | "Sign-Up">("Login");
-  const isLoggedIn = false; // true = avatar, false = login icon
+   const [route, setRoute] = useState<"Login" | "Sign-Up" | "Verification">("Login");
+  
+  
+ 
+const { user } = useSelector((state: any) => state.auth);
+const isLoggedIn = !!user;
+
+
+  
 
   return (
     <header className="w-full bg-gray-800 text-white dark:bg-black shadow-md">
@@ -42,7 +52,7 @@ const Header = () => {
             {isLoggedIn ? (
               <Link href="/profile">
                 <Image
-                  src="/avatar.png"
+                   src={user?.avatar ? user.avatar : avatar}
                   alt="Profile"
                   width={35}
                   height={35}
@@ -77,12 +87,13 @@ const Header = () => {
             {isLoggedIn ? (
               <Link href="/profile">
                 <Image
-                  src="/avatar.png"
-                  alt="Profile"
-                  width={32}
-                  height={32}
-                  className="rounded-full cursor-pointer"
-                />
+                        src={user?.avatar ? user.avatar : avatar}
+                        alt="Profile"
+                        width={35}
+                        height={35}
+                        className="rounded-full cursor-pointer"
+                      />
+
               </Link>
             ) : (
               <button
@@ -135,6 +146,16 @@ const Header = () => {
               open={modalOpen}
               setOpen={setModalOpen}
               component={Signup}
+              setRoute={setRoute}
+            />
+          )}
+
+
+          {route === "Verification" && (
+            <CustomModal
+              open={modalOpen}
+              setOpen={setModalOpen}
+              component={Verification}
               setRoute={setRoute}
             />
           )}

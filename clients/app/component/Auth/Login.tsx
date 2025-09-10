@@ -1,11 +1,13 @@
 "use client";
 
 import { useFormik } from "formik";
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { AiFillGithub, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import * as Yup from "yup";
 import { styles } from "../../../app/styles/style";
+import { useLoginMutation } from "@/redux/features/auth/authApi";
+import toast from "react-hot-toast";
 
 type Props = {
   setRoute: (route: string) => void;
@@ -14,21 +16,33 @@ type Props = {
 
 const Schema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().required("Password is required").min(8, "Password must be at least 8 characters"),
+  password: Yup.string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters"),
 });
 
 const Login: FC<Props> = ({ setRoute, setOpen }) => {
+  const [login, { isSuccess, isError, data, error }] = useLoginMutation();
   const [show, setShow] = useState(false);
 
   const formik = useFormik({
     initialValues: { email: "", password: "" },
     validationSchema: Schema,
     onSubmit: ({ email, password }) => {
-      console.log("Login attempt:", { email, password });
-      alert(`Login attempt:\nEmail: ${email}\nPassword: ${password}`);
-      setOpen(false);
+      login({ email, password }); // Call the RTK Query mutation
     },
   });
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Login successful");
+      setOpen(false);
+    }
+    if (isError) {
+      const message = (error as any)?.data?.message || "Login failed";
+      toast.error(message);
+    }
+  }, [isSuccess, isError, error, setOpen]);
 
   const { errors, touched, values, handleChange, handleSubmit } = formik;
 
@@ -36,6 +50,7 @@ const Login: FC<Props> = ({ setRoute, setOpen }) => {
     <div className="w-full">
       <h1 className={`${styles.title}`}>Login with ELearning</h1>
       <form onSubmit={handleSubmit}>
+        {/* Email Input */}
         <div className="w-full mt-5 relative mb-1">
           <label className={`${styles.label}`} htmlFor="email">
             Enter your email address
@@ -47,13 +62,14 @@ const Login: FC<Props> = ({ setRoute, setOpen }) => {
             onChange={handleChange}
             id="email"
             placeholder="loginmail@gmail.com"
-            className={`${errors.email && touched.email && "border-red-500"} ${styles.input}`}
+            className={`${errors.email && touched.email ? "border-red-500" : ""} ${styles.input}`}
           />
           {errors.email && touched.email && (
             <span className="text-red-500 pt-2 block">{errors.email}</span>
           )}
         </div>
 
+        {/* Password Input */}
         <div className="w-full mt-5 relative mb-1">
           <label className={`${styles.label}`} htmlFor="password">
             Enter your password
@@ -65,7 +81,7 @@ const Login: FC<Props> = ({ setRoute, setOpen }) => {
             onChange={handleChange}
             id="password"
             placeholder="password@#!&"
-            className={`${errors.password && touched.password && "border-red-500"} ${styles.input}`}
+            className={`${errors.password && touched.password ? "border-red-500" : ""} ${styles.input}`}
           />
           {!show ? (
             <AiOutlineEyeInvisible
@@ -85,10 +101,12 @@ const Login: FC<Props> = ({ setRoute, setOpen }) => {
           )}
         </div>
 
+        {/* Submit Button */}
         <div className="w-full mt-5">
           <input type="submit" value="Login" className={`${styles.button}`} />
         </div>
 
+        {/* Social Login */}
         <br />
         <h5 className="text-center pt-4 font-Poppins text-[14px] text-black dark:text-white">
           Or join with
@@ -98,6 +116,7 @@ const Login: FC<Props> = ({ setRoute, setOpen }) => {
           <AiFillGithub size={30} className="cursor-pointer ml-2" />
         </div>
 
+        {/* Switch to Sign-Up */}
         <h5 className="text-center pt-4 font-Poppins text-[14px] dark:text-white text-black">
           Not have any account?{" "}
           <span
