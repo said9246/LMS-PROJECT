@@ -1,6 +1,7 @@
 import { apiSlice } from "../api/apiSlice";
 import {
   userLoggedIn,
+  userLoggedOut,
   //  userLoggedOut, 
    userRegistration } from "./authSlice";
 
@@ -70,45 +71,48 @@ export const authApi = apiSlice.injectEndpoints({
         }
       },
     }),
-    // socialAuth: builder.mutation({
-    //   query: ({ email, name, avatar }) => ({
-    //     url: "social-auth",
-    //     method: "POST",
-    //     body: {
-    //       email,
-    //       name,
-    //       avatar,
-    //     },
-    //     credentials: "include" as const,
-    //   }),
-    //   async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-    //     try {
-    //       const result = await queryFulfilled;
-    //       dispatch(
-    //         userLoggedIn({
-    //           accessToken: result.data.accessToken,
-    //           user: result.data.user,
-    //         })
-    //       );
-    //     } catch (error: any) {
-    //       console.log(error);
-    //     }
-    //   },
-    // }),
-    // logout: builder.query({
-    //   query: () => ({
-    //     url: "logout",
-    //     method: "GET",
-    //     credentials: "include" as const,
-    //   }),
-    //   async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-    //     try {
-    //       dispatch(userLoggedOut());
-    //     } catch (error: any) {
-    //       console.log(error);
-    //     }
-    //   },
-    // }),
+    socialAuth: builder.mutation({
+      query: ({ email, name, avatar }) => ({
+        url: "social-auth",
+        method: "POST",
+        body: {
+          email,
+          name,
+          avatar,
+        },
+        credentials: "include" as const,
+      }),
+      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(
+            userLoggedIn({
+              accessToken: result.data.accessToken,
+              user: result.data.user,
+            })
+          );
+        } catch (error: any) {
+          console.log(error);
+        }
+      },
+    }),
+  // authApi.ts
+logout: builder.mutation<void, void>({
+  query: () => ({
+    url: "logout",
+    method: "POST",  // agar tumhara backend GET accept karta hai to GET bhi rakh sakte ho
+    credentials: "include" as const,
+  }),
+  async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+    try {
+      await queryFulfilled; // wait for API response
+      dispatch(userLoggedOut());
+    } catch (error: any) {
+      console.log(error);
+    }
+  },
+}),
+
 
 
 
@@ -119,6 +123,6 @@ export const {
   useRegisterMutation,
   useActivationMutation,
   useLoginMutation,
-  // useSocialAuthMutation,
-  // useLogoutQuery
+  useSocialAuthMutation,
+  useLogoutMutation,
 } = authApi;

@@ -1,9 +1,10 @@
-import { useLogoutQuery } from "@/redux/features/auth/authApi";
+import { useLogoutMutation } from "@/redux/features/auth/authApi";
 import { signOut } from "next-auth/react";
 import { FC, useState } from "react";
 import ChangePassword from "./ChangePassword";
 import ProfileInfo from "./ProfileInfo";
 import SidebarProfile from "./SidebarProfile";
+import toast from "react-hot-toast";
 
 type Props = {
   user: any;
@@ -12,16 +13,21 @@ type Props = {
 const Profile: FC<Props> = ({ user }) => {
   const [scroll, setScroll] = useState(false);
   const [active, setActive] = useState(1);
-  const [avatar, setAvatar] = useState(null);
-  const [logout, setLogout] = useState(false);
-  const {} = useLogoutQuery(undefined, {
-    skip: !logout ? true : false,
-  });
+  const [avatar, setAvatar] = useState<string | null>(null);
 
-  const logoutHandler = async () => {
-    setLogout(true);
+  // 👇 change here
+const [logout] = useLogoutMutation();
+
+const logoutHandler = async () => {
+  try {
+    await logout().unwrap();
     await signOut();
-  };
+       toast.success("Logout successfully!");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
   if (typeof window !== "undefined") {
     window.addEventListener("scroll", () => {
@@ -44,7 +50,7 @@ const Profile: FC<Props> = ({ user }) => {
           user={user}
           active={active}
           setActive={setActive}
-          logoutHandler={logoutHandler}
+          logoutHandler={logoutHandler}  // ✅ updated
           avatar={avatar}
         />
       </div>

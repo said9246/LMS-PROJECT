@@ -111,7 +111,7 @@ const isLoggedIn = !!user;
 
         {/* Mobile Dropdown */}
         {open && (
-          <div className="absolute top-16 left-0 w-full bg-gray-800 dark:bg-black shadow-md md:hidden z-50">
+          <div className="fixed top-0 left-0 w-full h-16 bg-gray-800 text-white shadow-md z-50 flex items-center px-6">
             <ul className="flex flex-col items-center space-y-6 py-6 text-lg font-semibold">
               {menuItems.map((item) => (
                 <li key={item.name}>
@@ -119,7 +119,7 @@ const isLoggedIn = !!user;
                     href={item.href}
                     className="text-white"
                     onClick={() => setOpen(false)}
-                  >
+                  >  
                     {item.name}
                   </Link>
                 </li>

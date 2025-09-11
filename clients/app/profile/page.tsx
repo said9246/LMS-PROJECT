@@ -2,7 +2,7 @@
 import { FC, useState } from "react";
 import { useSelector } from "react-redux";
 import Header from "../component/Header";
-import Profile from "../component/Profile/Profile.tsx";
+import Profile from "../component/Profile/Profile";
 import Protected from "../hooks/useProtected";
 import Headings from "../utils/Heading";
 

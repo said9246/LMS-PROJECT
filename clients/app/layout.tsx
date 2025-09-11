@@ -34,7 +34,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Header/> 
             <Custom>{children}</Custom>
-            <Toaster position="top-right" reverseOrder={false} />
+            <Toaster position="bottom-center" reverseOrder={false} />
           </ThemeProvider>
         </Provider>
       </body>

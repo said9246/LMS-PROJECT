@@ -19,7 +19,7 @@ const Hero: FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col lg:flex-row items-center bg-gray-800 px-6 py-12 gap-10 lg:gap-20">
+    <div className="w-full flex flex-col lg:flex-row items-center bg-gray-700 px-6 py-22 gap-10 lg:gap-20">
       {/* Left Column - Image */}
       <div className="lg:w-1/2 flex items-center justify-center">
         <div className="p-6 bg-blue-900 rounded-[500px] flex items-center justify-center w-[250px] h-[250px] sm:w-[300px] sm:h-[300px] lg:w-[500px] lg:h-[500px]">
