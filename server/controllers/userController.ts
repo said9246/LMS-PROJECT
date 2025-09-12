@@ -12,6 +12,9 @@ import { catchAsyncErrors } from "../middleware/catchAsyncErrors";
 import { accessTokenOptions, refreshTokenOptions, sendToken } from '../utils/jwt';
 import { redis } from '../utils/redis';
 import { getUserById } from '../services/userServices';
+import cloudinary from "../utils/cloudinary";  // path apne project ka
+import ErrorHandler from '../utils/ErrorHandler';
+
 
 
 
@@ -370,69 +373,91 @@ export const updateAccessToken = catchAsyncErrors(
     }
   );
   
-  // Update avatar
-  interface IUpdateAvatar {
-    avatar: string;
-  }
-  
-  export const updateAvatar = catchAsyncErrors(
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { avatar } = req.body as IUpdateAvatar;
-        const userId = req.user?._id;
-        const user = await userModel.findById(userId);
-  
-        if (!user) {
-          return next(new Errorhanddler("Invalid User", 400));
-        }
-  
-        if (avatar && user) {
-          if (user?.avatar?.public_id) {
-            await cloudinary.v2.uploader.destroy(user?.avatar?.public_id);
-  
-            const myCloud = await cloudinary.v2.uploader.upload(avatar, {
-              folder: "avatars",
-              width: 150,
-            });
-  
-            user.avatar = {
-              public_id: myCloud.public_id,
-              url: myCloud.secure_url,
-            };
-          } else {
-            const myCloud = await cloudinary.v2.uploader.upload(avatar, {
-              folder: "avatars",
-              width: 150,
-            });
-  
-            user.avatar = {
-              public_id: myCloud.public_id,
-              url: myCloud.secure_url,
-            };
-          }
-        }
-  
-        await user?.save();
-        await redis.set(userId, JSON.stringify(user));
-  
-        res.status(201).json({
-          success: true,
-          message: "Avatar saved successfully",
-          user: user,
-        });
-      } catch (error: any) {
-        return next(new Errorhanddler(error.message, 400));
-      }
+ // Update avatar
+interface IUpdateAvatar {
+  avatar: string;
+}
+export const updateAvatar = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // ✅ avatar ko safe tarike se pick karna
+    const avatar =
+      typeof req.body.avatar === "string"
+        ? req.body.avatar
+        : req.body.avatar?.avatar;
+
+    if (!avatar) {
+      return next(new ErrorHandler("Invalid avatar format", 400));
     }
-  );
-  
+
+    const userId = req.user?._id;
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return next(new ErrorHandler("Invalid User", 400));
+    }
+
+    if (avatar && user) {
+      // Delete previous avatar from Cloudinary
+      if (user?.avatar?.public_id) {
+        await cloudinary.uploader.destroy(user.avatar.public_id);
+      }
+
+      // ✅ Remove base64 prefix
+      const base64Data = avatar.replace(/^data:image\/\w+;base64,/, "");
+      const buffer = Buffer.from(base64Data, "base64");
+
+      // ✅ Upload using upload_stream
+      const uploadFromBuffer = () =>
+        new Promise<{ public_id: string; secure_url: string }>(
+          (resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              { folder: "avatars", width: 150 },
+              (error, result) => {
+                if (error) return reject(error);
+                resolve({
+                  public_id: result!.public_id,
+                  secure_url: result!.secure_url,
+                });
+              }
+            );
+            stream.end(buffer);
+          }
+        );
+
+      const myCloud = await uploadFromBuffer();
+
+      user.avatar = {
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
+      };
+    }
+
+    await user.save();
+    await redis.set(userId.toString(), JSON.stringify(user));
+
+    res.status(201).json({
+      success: true,
+      message: "Avatar saved successfully",
+      user,
+    });
+  } catch (error: any) {
+    console.log("🔥 updateAvatar Error:", error);
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
+
+
   // get all users -- admin
   export const getAllUsersByAdmin = catchAsyncErrors(
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         getAllUsersService(res);
       } catch (error: any) {
-        return next(new Errorhanddler(error.message, 400));
+        return next(new ErrorHandler(error.message, 400));
       }
     }
   );

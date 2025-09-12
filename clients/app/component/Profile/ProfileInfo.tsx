@@ -16,7 +16,10 @@ type Props = {
 };
 
 const ProfileInfo: React.FC<Props> = ({ user, avatar }) => {
-  const [name, setName] = React.useState(user && user.name);
+  // const [name, setName] = React.useState(user && user.name);
+  const [name, setName] = React.useState(user?.name || "");
+const [avatarUrl, setAvatarUrl] = React.useState(user?.avatar?.url || avatar || avatarDefault);
+
   const [updateAvatar, { isSuccess, error }] = useUpdateAvatarMutation();
   const [updateUser, { isSuccess: success, error: updateUserError }] =
     useUpdateUserMutation();
@@ -25,20 +28,49 @@ const ProfileInfo: React.FC<Props> = ({ user, avatar }) => {
     skip: loadUser ? false : true,
   });
 
+  // const imageHandler = async (e: any) => {
+  //   const fileReader = new FileReader();
+
+  //   fileReader.onload = () => {
+  //     if (fileReader.readyState === 2) {
+  //       const avatar = fileReader.result;
+        
+  //       updateAvatar({ avatar });
+  //     }
+  //   };
+
+  //   fileReader.readAsDataURL(e.target.files[0]);
+  // };
+
   const imageHandler = async (e: any) => {
-    const fileReader = new FileReader();
+  const fileReader = new FileReader();
 
-    fileReader.onload = () => {
-      if (fileReader.readyState === 2) {
-        const avatar = fileReader.result;
-        updateAvatar(avatar);
-      }
-    };
+  fileReader.onload = () => {
+    if (fileReader.readyState === 2) {
+      const avatarBase64 = fileReader.result;
 
-    fileReader.readAsDataURL(e.target.files[0]);
+      updateAvatar({ avatar: avatarBase64 })
+        .unwrap()
+        .then((res: any) => {
+          setAvatarUrl(res.user.avatar.url); // ✅ update local state
+          toast.success("Avatar updated successfully");
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Failed to update avatar");
+        });
+    }
   };
 
+  fileReader.readAsDataURL(e.target.files[0]);
+};
+
+  
+  
+  
+  
   React.useEffect(() => {
+    
     if (isSuccess || success) {
       setLoadUser(true);
     }
@@ -47,7 +79,9 @@ const ProfileInfo: React.FC<Props> = ({ user, avatar }) => {
     }
     if(success) {
       toast.success("User updated successfully")
-    }
+    }if(isSuccess)
+       toast.success("Avatar updated successfully");
+
   }, [error, isSuccess, success, updateUserError]);
 
   const handleSubmit = async (e: any) => {
@@ -65,8 +99,10 @@ const ProfileInfo: React.FC<Props> = ({ user, avatar }) => {
       <div className="w-full flex justify-center">
         <div className="relative">
           <Image
-            src={
-              user.avatar || avatar ? user.avatar.url || avatar : avatarDefault
+            src={avatarUrl
+              // user.avatar || avatar ? user.avatar.url || avatar : avatarDefault
+              
+
             }
             alt="Profile Photo"
             width={120}

@@ -52,7 +52,7 @@ const isLoggedIn = !!user;
             {isLoggedIn ? (
               <Link href="/profile">
                 <Image
-                   src={user?.avatar ? user.avatar : avatar}
+                    src={user?.avatar?.url ? user.avatar.url : avatar}
                   alt="Profile"
                   width={35}
                   height={35}
@@ -87,7 +87,7 @@ const isLoggedIn = !!user;
             {isLoggedIn ? (
               <Link href="/profile">
                 <Image
-                        src={user?.avatar ? user.avatar : avatar}
+                        src={user?.avatar?.url ? user.avatar.url : avatar}
                         alt="Profile"
                         width={35}
                         height={35}
