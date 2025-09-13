@@ -125,7 +125,10 @@ export const apiSlice = createApi({
             })
           );
         } catch (error) {
-          console.log("Load user error:", error);
+          
+          // console.log("Load user error:", error);
+            toast.error("Something went wrong while loading user");
+
         }
       },
     }),
@@ -137,3 +140,4 @@ export const {
   useRefreshTokenQuery,
   useLoadUserQuery,
 } = apiSlice;
+  

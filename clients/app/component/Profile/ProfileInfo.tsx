@@ -119,15 +119,15 @@ const [avatarUrl, setAvatarUrl] = React.useState(user?.avatar?.url || avatar || 
           />
           <label htmlFor="avatar">
             <div className="w-[30px] h-[30px] bg-slate-900 rounded-full absolute bottom-2 right-2 flex items-center justify-center cursor-pointer">
-              <AiOutlineCamera size={20} className="z-1" />
+              <AiOutlineCamera size={50} className="z-1" />
             </div>
           </label>
         </div>
       </div>
       <br />
-      <br />
+      
 
-      <div className="w-full pl-6 800px:pl-10">
+      <div className="w-9/12 mx-auto  pl-6 800px:pl-10">
         <form onSubmit={handleSubmit}>
           <div className="800px:w-[50%] m-auto block pb-4">
             <div className="w-[100%]">
@@ -143,7 +143,7 @@ const [avatarUrl, setAvatarUrl] = React.useState(user?.avatar?.url || avatar || 
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-            <br />
+            {/* <br /> */}
             <div className="w-[100%] pt-2">
               <label className="block" htmlFor="email">
                 Email
@@ -157,7 +157,7 @@ const [avatarUrl, setAvatarUrl] = React.useState(user?.avatar?.url || avatar || 
                 value={user && user.email}
               />
             </div>
-            <br />
+            {/* <br /> */}
             <input
               type="submit"
               className="w-full 800px:w-[250px] h-[40px] border border-[cyan] text-center dark:text-white text-black rounded-[3px] mt-8 cursor-pointer"
